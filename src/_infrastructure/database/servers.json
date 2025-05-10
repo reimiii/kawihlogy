@@ -1,0 +1,13 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "Postgres Kawih Logy",
+      "Group": "Servers",
+      "Host": "postgres",
+      "Port": 5432,
+      "Username": "kawihlogy",
+      "SSLMode": "prefer",
+      "MaintenanceDB": "kawihlogy"
+    }
+  }
+}

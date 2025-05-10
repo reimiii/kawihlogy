@@ -1,0 +1,32 @@
+name: 'kawihlogy'
+services:
+  postgres:
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_USER: kawihlogy
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: kawihlogy
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: kawih@kawih.com
+      PGADMIN_DEFAULT_PASSWORD: password
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - '8080:80'
+    depends_on:
+      - postgres
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+      - ./src/_infrastructure/database/servers.json:/pgadmin4/servers.json
+
+volumes:
+  postgres_data:
+  pgadmin_data:
