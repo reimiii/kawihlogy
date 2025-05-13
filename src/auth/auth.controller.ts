@@ -1,10 +1,9 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import { Body, Controller, Logger, Post } from '@nestjs/common';
+import { Body, Controller, HttpCode, Logger, Post } from '@nestjs/common';
 import { ZodValidationPipe } from 'src/core/pipes/zod-validation.pipe';
 import { AuthService } from './auth.service';
 import { LoginDto, LoginSchema } from './dto/login.dto';
 import { RegisterDto, RegisterSchema } from './dto/register.dto';
+import { JwtToken } from './types/auth.type';
 
 @Controller('auth')
 export class AuthController {
@@ -12,25 +11,33 @@ export class AuthController {
 
   constructor(private authService: AuthService) {}
 
+  @HttpCode(200)
   @Post('login')
-  login(@Body(new ZodValidationPipe(LoginSchema)) body: LoginDto) {
-    this.logger.log('start', this.login.name);
-    console.log('body', body);
+  async login(
+    @Body(new ZodValidationPipe(LoginSchema)) body: LoginDto,
+  ): Promise<JwtToken> {
+    this.logger.log('start controller login');
 
-    this.logger.log('finish', this.login.name);
+    const result = await this.authService.login({
+      payload: body,
+    });
+
+    this.logger.log('finish controller login');
+
+    return result;
   }
 
   @Post('register')
   async register(
     @Body(new ZodValidationPipe(RegisterSchema)) body: RegisterDto,
-  ) {
-    this.logger.log('start', this.register.name);
+  ): Promise<JwtToken> {
+    this.logger.log('start controller register');
 
     const result = await this.authService.register({
       payload: body,
     });
 
-    this.logger.log('finish', this.register.name);
+    this.logger.log('finish controller register');
 
     return result;
   }

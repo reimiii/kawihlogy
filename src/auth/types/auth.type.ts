@@ -14,6 +14,10 @@ export interface RegisterCommandOptions extends RegisterOptions {
   entityManager: EntityManager;
 }
 
+export interface LoginCommandOptions extends LoginOptions {
+  entityManager?: EntityManager;
+}
+
 export interface JwtToken {
   accessToken: string;
   permissions: string[];
