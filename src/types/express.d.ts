@@ -1,7 +1,7 @@
-import { User } from 'src/user/entities/user.entity';
+import { UserClaims } from 'src/auth/types/jwt-payload.type';
 
 declare module 'express' {
   interface Request {
-    user?: Pick<User, 'id' | 'role'>;
+    user?: UserClaims;
   }
 }

@@ -1,16 +1,24 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  OnModuleInit,
+} from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
 import { DataSource } from 'typeorm';
 import { LoginCommand } from './commands/login.command';
 import { RegisterCommand } from './commands/register.command';
 import { RolesPermissions } from './constants/roles-permissions.map';
 import { JwtToken, LoginOptions, RegisterOptions } from './types/auth.type';
+import { User } from 'src/user/entities/user.entity';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class AuthService implements OnModuleInit {
   private readonly logger = new Logger(AuthService.name);
 
   constructor(
+    private readonly userService: UserService,
     private readonly moduleRef: ModuleRef,
     private readonly ds: DataSource,
   ) {}
@@ -49,5 +57,19 @@ export class AuthService implements OnModuleInit {
     this.logger.log('finish auth register');
 
     return result;
+  }
+
+  async getUserProfile(id: string): Promise<User> {
+    this.logger.log('start get profile');
+
+    const user = await this.userService.findOne({
+      by: { key: 'id', value: id },
+    });
+
+    if (!user) throw new NotFoundException('user not found');
+
+    this.logger.log('finish get profile');
+
+    return user;
   }
 }
