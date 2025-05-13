@@ -1,18 +1,16 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { EnvModule } from '../env/env.module';
-import { EnvService } from '../env/env.service';
 import { DataSource, DataSourceOptions } from 'typeorm';
+import { EnvService } from '../env/env.service';
 
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
-      imports: [EnvModule],
       inject: [EnvService],
       useFactory: (env: EnvService): TypeOrmModuleOptions => {
         const paths = {
-          entities: `${process.cwd()}/src/**/*.entity{.ts,.js}`,
-          migrations: `${process.cwd()}/src/_infrastructure/migrations/**/*{.ts,.js}`,
+          entities: `${process.cwd()}/dist/**/*.entity{.ts,.js}`,
+          migrations: `${process.cwd()}/dist/_infrastructure/database/migrations/**/*{.ts,.js}`,
         };
 
         return {
@@ -27,7 +25,7 @@ import { DataSource, DataSourceOptions } from 'typeorm';
           migrationsRun: env.get('DB_SYNCHRONIZE'),
           logging: env.get('DB_LOGGING'),
           autoLoadEntities: true,
-          logger: 'formatted-console',
+          logger: 'advanced-console',
         };
       },
 

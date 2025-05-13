@@ -1,16 +1,20 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
 import { EnvService } from './_infrastructure/env/env.service';
+import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-
-  app.enableShutdownHooks();
+  const app = await NestFactory.create(AppModule, {
+    logger: ['error', 'warn', 'log'],
+  });
 
   const config = app.get(EnvService);
   const port = config.get('PORT');
 
+  // app.useGlobalFilters(new GlobalExceptionFilter());
+
+  app.enableShutdownHooks();
+
   await app.listen(port);
 }
 
-bootstrap().catch(() => new Error('Failed to start the application'));
+bootstrap();
