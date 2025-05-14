@@ -1,10 +1,8 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/require-await */
 import { Injectable, Logger } from '@nestjs/common';
-import { FindOneOptionsBy } from 'src/core/repository/utils/find-one.util';
+import { FindOneOptionsBy } from 'src/core/repositories/utils/find-one.util';
+import { PersistOptions } from 'src/core/repositories/utils/persist.util';
 import { User } from './entities/user.entity';
 import { UserRepository } from './repositories/user.repository';
-import { PersistOptions } from 'src/core/repository/utils/persist.util';
 
 @Injectable()
 export class UserService {

@@ -1,14 +1,14 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { DataSource, EntityManager, Repository } from 'typeorm';
-import { User } from '../entities/user.entity';
+import { PaginateResult } from 'src/core/repositories/types/paginate-result.type';
 import { FindOneOptionsBy } from 'src/core/repositories/utils/find-one.util';
 import { PaginateOptions } from 'src/core/repositories/utils/paginate.util';
-import { PaginateResult } from 'src/core/repositories/types/paginate-result.type';
 import { PersistOptions } from 'src/core/repositories/utils/persist.util';
+import { DataSource, EntityManager, Repository } from 'typeorm';
+import { Journal } from '../entities/journal.entity';
 
 @Injectable()
-export class UserRepository extends Repository<User> {
-  private readonly logger = new Logger(UserRepository.name);
+export class JournalRepository extends Repository<Journal> {
+  private readonly logger = new Logger(JournalRepository.name);
 
   constructor(
     @Inject(DataSource)
@@ -19,16 +19,16 @@ export class UserRepository extends Repository<User> {
         ? dataSourceOrEntity.createEntityManager()
         : dataSourceOrEntity;
 
-    super(User, entityManager);
+    super(Journal, entityManager);
   }
 
-  public useManager(manager?: EntityManager): UserRepository {
-    return manager ? new UserRepository(manager) : this;
+  public useManager(manager?: EntityManager): JournalRepository {
+    return manager ? new JournalRepository(manager) : this;
   }
 
   public async findOneUnique(
-    params: FindOneOptionsBy<User, 'id' | 'email'>,
-  ): Promise<User | null> {
+    params: FindOneOptionsBy<Journal, 'id'>,
+  ): Promise<Journal | null> {
     this.logger.verbose('start', this.findOneUnique.name);
 
     const repo = this.useManager(params.manager);
@@ -49,8 +49,8 @@ export class UserRepository extends Repository<User> {
   }
 
   public async paginate(
-    params: PaginateOptions<User>,
-  ): Promise<PaginateResult<User>> {
+    params: PaginateOptions<Journal>,
+  ): Promise<PaginateResult<Journal>> {
     this.logger.verbose('start', this.paginate.name);
 
     const repo = this.useManager(params.manager);
@@ -86,9 +86,9 @@ export class UserRepository extends Repository<User> {
     };
   }
 
-  public async persist<RequiredKeys extends keyof User = never>(
-    params: PersistOptions<User, RequiredKeys>,
-  ): Promise<User> {
+  public async persist<RequiredKeys extends keyof Journal = never>(
+    params: PersistOptions<Journal, RequiredKeys>,
+  ): Promise<Journal> {
     this.logger.verbose('start', this.persist.name);
 
     const repo = this.useManager(params.manager);
