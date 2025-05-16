@@ -5,6 +5,7 @@ import { PaginateOptions } from 'src/core/repositories/utils/paginate.util';
 import { PersistOptions } from 'src/core/repositories/utils/persist.util';
 import { DataSource, EntityManager, Repository } from 'typeorm';
 import { Journal } from '../entities/journal.entity';
+import { ArchiveOptions } from 'src/core/repositories/utils/archive.util';
 
 @Injectable()
 export class JournalRepository extends Repository<Journal> {
@@ -96,6 +97,18 @@ export class JournalRepository extends Repository<Journal> {
     const result = await repo.save(entity);
 
     this.logger.verbose('finish', this.persist.name);
+    return result;
+  }
+
+  public async archive(params: ArchiveOptions<Journal, 'id'>) {
+    this.logger.log('start archiving');
+
+    const e = params.entity;
+    const repo = this.useManager(params.manager);
+    const result = await repo.softRemove(e);
+
+    this.logger.log('finish archiving');
+
     return result;
   }
 }

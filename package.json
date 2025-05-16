@@ -21,6 +21,7 @@
     "typeorm": "pnpm ts-node -P tsconfig.json -r tsconfig-paths/register ./node_modules/typeorm/cli.js"
   },
   "dependencies": {
+    "@google/genai": "^0.14.0",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.0.1",
@@ -32,7 +33,9 @@
     "@nestjs/typeorm": "^11.0.0",
     "@nestjs/websockets": "^11.1.0",
     "bcrypt": "^6.0.0",
+    "dayjs": "^1.11.13",
     "dotenv": "^16.5.0",
+    "mime": "^4.0.7",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "pg": "^8.15.6",
