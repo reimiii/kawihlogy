@@ -7,10 +7,19 @@ import { DataSource, EntityManager, Repository } from 'typeorm';
 import { Journal } from '../entities/journal.entity';
 import { ArchiveOptions } from 'src/core/repositories/utils/archive.util';
 
+/**
+ * Repository for managing Journal entities with custom methods for pagination, persistence, and archiving.
+ * Extends the TypeORM Repository for Journal.
+ */
 @Injectable()
 export class JournalRepository extends Repository<Journal> {
+  /** Logger instance for JournalRepository */
   private readonly logger = new Logger(JournalRepository.name);
 
+  /**
+   * Constructs a new JournalRepository instance.
+   * @param dataSourceOrEntity - The DataSource or EntityManager to use for database operations.
+   */
   constructor(
     @Inject(DataSource)
     readonly dataSourceOrEntity: DataSource | EntityManager,
@@ -23,10 +32,20 @@ export class JournalRepository extends Repository<Journal> {
     super(Journal, entityManager);
   }
 
+  /**
+   * Returns a new JournalRepository instance using the provided EntityManager, or the current instance if none is provided.
+   * @param manager - Optional EntityManager to use.
+   * @returns JournalRepository instance with the specified manager.
+   */
   public useManager(manager?: EntityManager): JournalRepository {
     return manager ? new JournalRepository(manager) : this;
   }
 
+  /**
+   * Finds a unique Journal entity by a specific key and value, with optional additional query options.
+   * @param params - Options for finding the entity, including key, value, and additional query options.
+   * @returns The found Journal entity or null if not found.
+   */
   public async findOneUnique(
     params: FindOneOptionsBy<Journal, 'id'>,
   ): Promise<Journal | null> {
@@ -49,6 +68,19 @@ export class JournalRepository extends Repository<Journal> {
     return result;
   }
 
+  /**
+   * Paginates Journal entities based on the provided options.
+   *
+   * @param params - Pagination options object:
+   *   - `page` (number): Page number to retrieve (default: 1).
+   *   - `size` (number): Number of items per page (default: 10).
+   *   - `where` (FindOptionsWhere<Journal>): Filter conditions for the query (e.g., `{ userId: 1 }`).
+   *   - `order` (FindOptionsOrder<Journal>): Sorting order for the results (e.g., `{ createdAt: 'DESC' }`).
+   *   - `relations` (string[]): Relations to load with each Journal entity (e.g., `["user"]`).
+   *   - `select` (FindOptionsSelect<Journal>): Fields to select in the result (e.g., `{ id: true, title: true }`).
+   *   - `manager` (EntityManager): Optional custom EntityManager for advanced use cases.
+   * @returns PaginateResult containing items and pagination metadata (total, page, size, lastPage, hasNext, hasPrev).
+   */
   public async paginate(
     params: PaginateOptions<Journal>,
   ): Promise<PaginateResult<Journal>> {
@@ -87,6 +119,11 @@ export class JournalRepository extends Repository<Journal> {
     };
   }
 
+  /**
+   * Persists (creates or updates) a Journal entity in the database.
+   * @param params - Persistence options including the entity data and optional manager.
+   * @returns The persisted Journal entity.
+   */
   public async persist<RequiredKeys extends keyof Journal = never>(
     params: PersistOptions<Journal, RequiredKeys>,
   ): Promise<Journal> {
@@ -101,6 +138,11 @@ export class JournalRepository extends Repository<Journal> {
     return result;
   }
 
+  /**
+   * Archives (soft removes) a Journal entity from the database.
+   * @param params - Archive options including the entity to archive and optional manager.
+   * @returns The archived Journal entity.
+   */
   public async archive(params: ArchiveOptions<Journal, 'id'>) {
     this.logger.log('start archiving from repository');
 
