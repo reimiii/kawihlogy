@@ -2,13 +2,13 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
 import { DataSource } from 'typeorm';
 import { CreateJournalCommand } from './commands/create-journal.command';
+import { DeleteJournalCommand } from './commands/delete-journal.command';
 import { UpdateJournalCommand } from './commands/update-journal.command';
 import {
   CreateJournalOptions,
   DeleteJournalOptions,
   UpdateJournalOptions,
 } from './types/journal.type';
-import { DeleteJournalCommand } from './commands/delete-journal.command';
 
 @Injectable()
 export class JournalService {
@@ -20,7 +20,7 @@ export class JournalService {
   ) {}
 
   async create(params: CreateJournalOptions): Promise<void> {
-    this.logger.log('start from service');
+    this.logger.log('start from service create');
 
     await this.ds.transaction(async (manager) => {
       const command = await this.moduleRef.resolve(CreateJournalCommand);
@@ -31,7 +31,7 @@ export class JournalService {
       });
     });
 
-    this.logger.log('finish from service');
+    this.logger.log('finish from service create');
   }
 
   findAll() {
@@ -43,6 +43,8 @@ export class JournalService {
   }
 
   async update(params: UpdateJournalOptions) {
+    this.logger.log('start from service update');
+
     await this.ds.transaction(async (manager) => {
       const command = await this.moduleRef.resolve(UpdateJournalCommand);
       await command.execute({
@@ -52,9 +54,13 @@ export class JournalService {
         entityManager: manager,
       });
     });
+
+    this.logger.log('finish from service update');
   }
 
   async remove(params: DeleteJournalOptions): Promise<void> {
+    this.logger.log('start from service remove');
+
     await this.ds.transaction(async (manager) => {
       const command = await this.moduleRef.resolve(DeleteJournalCommand);
 
@@ -64,5 +70,7 @@ export class JournalService {
         entityManager: manager,
       });
     });
+
+    this.logger.log('finish from service remove');
   }
 }

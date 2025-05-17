@@ -82,10 +82,14 @@ export class JournalController {
   async remove(
     @Param(new ZodValidationPipe(JournalIdSchema)) params: JournalIdDto,
     @Identity() deletedBy: UserClaims,
-  ) {
+  ): Promise<void> {
+    this.logger.log('start from remove controller');
+
     await this.journalService.remove({
       identifier: params,
       deleteBy: deletedBy,
     });
+
+    this.logger.log('start from remove controller');
   }
 }
