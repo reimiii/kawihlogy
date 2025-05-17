@@ -5,7 +5,7 @@ import { DeleteJournalCommand } from './commands/delete-journal.command';
 import { UpdateJournalCommand } from './commands/update-journal.command';
 import { JournalController } from './journal.controller';
 import { JournalService } from './journal.service';
-import { JournalRepository } from './repositories/user.repository';
+import { JournalRepository } from './repositories/journal.repository';
 
 @Module({
   imports: [UserModule],

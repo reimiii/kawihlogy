@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { User } from 'src/user/entities/user.entity';
 import { UserService } from 'src/user/user.service';
-import { JournalRepository } from '../repositories/user.repository';
+import { JournalRepository } from '../repositories/journal.repository';
 import { CreateJournalCommandOptions } from '../types/journal.type';
 
 @Injectable({ scope: Scope.TRANSIENT })

@@ -30,7 +30,7 @@ export class JournalRepository extends Repository<Journal> {
   public async findOneUnique(
     params: FindOneOptionsBy<Journal, 'id'>,
   ): Promise<Journal | null> {
-    this.logger.verbose('start', this.findOneUnique.name);
+    this.logger.log('start find one unique from repository');
 
     const repo = this.useManager(params.manager);
 
@@ -44,7 +44,7 @@ export class JournalRepository extends Repository<Journal> {
       lock: params.lock,
     });
 
-    this.logger.verbose('finish', this.findOneUnique.name);
+    this.logger.log('finish find one unique from repository');
 
     return result;
   }
@@ -52,7 +52,7 @@ export class JournalRepository extends Repository<Journal> {
   public async paginate(
     params: PaginateOptions<Journal>,
   ): Promise<PaginateResult<Journal>> {
-    this.logger.verbose('start', this.paginate.name);
+    this.logger.log('start paginate from repository');
 
     const repo = this.useManager(params.manager);
 
@@ -72,7 +72,7 @@ export class JournalRepository extends Repository<Journal> {
     const hasNext = page < lastPage;
     const hasPrev = page > 1;
 
-    this.logger.verbose('finish', this.paginate.name);
+    this.logger.log('finish paginate from repository');
 
     return {
       items: items,
@@ -90,24 +90,25 @@ export class JournalRepository extends Repository<Journal> {
   public async persist<RequiredKeys extends keyof Journal = never>(
     params: PersistOptions<Journal, RequiredKeys>,
   ): Promise<Journal> {
-    this.logger.verbose('start', this.persist.name);
+    this.logger.log('start persist from repository');
 
     const repo = this.useManager(params.manager);
     const entity = repo.create(params.entity);
     const result = await repo.save(entity);
 
-    this.logger.verbose('finish', this.persist.name);
+    this.logger.log('finish persist from repository');
+
     return result;
   }
 
   public async archive(params: ArchiveOptions<Journal, 'id'>) {
-    this.logger.log('start archiving');
+    this.logger.log('start archiving from repository');
 
     const e = params.entity;
     const repo = this.useManager(params.manager);
     const result = await repo.softRemove(e);
 
-    this.logger.log('finish archiving');
+    this.logger.log('finish archiving repository');
 
     return result;
   }
