@@ -20,6 +20,11 @@ export interface DeleteJournalOptions {
   deleteBy: UserClaims;
 }
 
+export interface FindOneJournalOptions {
+  identifier: JournalIdDto;
+  accessBy: UserClaims;
+}
+
 export interface CreateJournalCommandOptions extends CreateJournalOptions {
   entityManager: EntityManager;
 }
