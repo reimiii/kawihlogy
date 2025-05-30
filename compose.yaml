@@ -27,6 +27,16 @@ services:
       - pgadmin_data:/var/lib/pgadmin
       - ./src/_infrastructure/database/servers.json:/pgadmin4/servers.json
 
+
+  redis:
+    image: redis:latest
+    restart: always
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+
 volumes:
   postgres_data:
   pgadmin_data:
+  redis_data:
