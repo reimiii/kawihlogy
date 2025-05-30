@@ -107,7 +107,7 @@ export class UpdateJournalCommand {
    */
   private async updateJournal(): Promise<void> {
     const {
-      payload: { content, date, isPrivate },
+      payload: { content, date, isPrivate, emotions, title, topics },
       entityManager,
     } = this._context;
 
@@ -117,6 +117,9 @@ export class UpdateJournalCommand {
         content: content ?? this.journal.content,
         date: date ?? this.journal.date,
         isPrivate: isPrivate ?? this.journal.isPrivate,
+        title: title ?? this.journal.title,
+        emotions: emotions ?? this.journal.emotions,
+        topics: topics ?? this.journal.topics,
       },
       manager: entityManager,
     });

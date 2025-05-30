@@ -106,7 +106,7 @@ export class CreateJournalCommand {
    */
   private async persistJournal(): Promise<void> {
     const {
-      payload: { content, date, isPrivate },
+      payload: { content, date, isPrivate, emotions, title, topics },
       entityManager,
     } = this._context;
 
@@ -116,6 +116,9 @@ export class CreateJournalCommand {
         content: content,
         date: date,
         isPrivate: isPrivate,
+        topics: topics,
+        emotions: emotions,
+        title: title,
       },
       manager: entityManager,
     });

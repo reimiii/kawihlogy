@@ -11,8 +11,22 @@ export class Journal extends BaseEntity {
   @JoinColumn({ name: 'user_id' })
   user: User;
 
+  @Column({
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+    default: 'Untitled Journal',
+  })
+  title: string;
+
   @Column({ type: 'text' })
   content: string;
+
+  @Column({ type: 'varchar', length: 70, array: true })
+  emotions: string[];
+
+  @Column({ type: 'varchar', length: 70, array: true })
+  topics: string[];
 
   @Column({ type: 'date' })
   date: Date;

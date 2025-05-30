@@ -14,6 +14,9 @@ export const JournalDateStringSchema = z
 
 export const CreateJournalSchema = z.object({
   content: z.string().min(10).max(5000),
+  title: z.string().max(255).optional().default('Untitled Journal'),
+  emotions: z.array(z.string().max(70)).min(1),
+  topics: z.array(z.string().max(70)).min(1),
   date: JournalDateStringSchema,
   isPrivate: z.boolean().optional().default(false),
 });
