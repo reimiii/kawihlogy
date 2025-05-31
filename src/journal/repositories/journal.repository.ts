@@ -5,7 +5,7 @@ import { PaginateOptions } from 'src/core/repositories/utils/paginate.util';
 import { PersistOptions } from 'src/core/repositories/utils/persist.util';
 import { DataSource, EntityManager, Repository } from 'typeorm';
 import { Journal } from '../entities/journal.entity';
-import { ArchiveOptions } from 'src/core/repositories/utils/archive.util';
+import { DeletionOptions } from 'src/core/repositories/utils/archive.util';
 
 /**
  * Repository for managing Journal entities with custom methods for pagination, persistence, and archiving.
@@ -61,6 +61,7 @@ export class JournalRepository extends Repository<Journal> {
       select: params.select,
       relations: params.relations,
       lock: params.lock,
+      withDeleted: params.withDeleted,
     });
 
     this.logger.log('finish find one unique from repository');
@@ -143,7 +144,9 @@ export class JournalRepository extends Repository<Journal> {
    * @param params - Archive options including the entity to archive and optional manager.
    * @returns The archived Journal entity.
    */
-  public async archive(params: ArchiveOptions<Journal, 'id'>) {
+  public async archive(
+    params: DeletionOptions<Journal, 'id'>,
+  ): Promise<Journal> {
     this.logger.log('start archiving from repository');
 
     const e = params.entity;
@@ -151,6 +154,32 @@ export class JournalRepository extends Repository<Journal> {
     const result = await repo.softRemove(e);
 
     this.logger.log('finish archiving repository');
+
+    return result;
+  }
+
+  public async unArchive(
+    params: DeletionOptions<Journal, 'id'>,
+  ): Promise<Journal> {
+    this.logger.log('start recovering from repository');
+
+    const e = params.entity;
+    const repo = this.useManager(params.manager);
+    const result = await repo.recover(e);
+
+    this.logger.log('finish recovering repository');
+
+    return result;
+  }
+
+  public async erase(params: DeletionOptions<Journal, 'id'>): Promise<Journal> {
+    this.logger.log('start destroying from repository');
+
+    const repo = this.useManager(params.manager);
+    const e = repo.create(params.entity);
+    const result = await repo.remove(e);
+
+    this.logger.log('finish destroying repository');
 
     return result;
   }

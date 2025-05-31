@@ -18,4 +18,5 @@ export interface FindOneOptionsBy<Entity, Key extends keyof Entity> {
   relations?: FindOptionsRelations<Entity>;
   manager?: EntityManager;
   lock?: FindOneOptions<Entity>['lock'];
+  withDeleted?: FindOneOptions<Entity>['withDeleted'];
 }

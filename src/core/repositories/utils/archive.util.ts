@@ -1,9 +1,9 @@
 import { EntityManager } from 'typeorm';
 
-export interface ArchiveOptions<
+export interface DeletionOptions<
   Entity,
   RequiredKeys extends keyof Entity = never,
 > {
-  entity: Partial<Entity> & Pick<Entity, RequiredKeys>;
+  entity: Pick<Entity, RequiredKeys> & Partial<Entity>;
   manager?: EntityManager;
 }
