@@ -5,6 +5,8 @@ import {
   Delete,
   Get,
   HttpCode,
+  HttpException,
+  HttpStatus,
   Logger,
   Param,
   Patch,
@@ -154,5 +156,23 @@ export class JournalController {
     });
 
     this.logger.log('Finished delete journal');
+  }
+
+  @HttpCode(200)
+  @Post(':id/poem/queue')
+  async createQueuePoem(
+    @Param(new ZodValidationPipe(JournalIdSchema)) params: JournalIdDto,
+    @Identity() createBy: UserClaims,
+  ) {
+    const { data, statusCode } = await this.journalService.triggerPoemQueue({
+      by: createBy,
+      identifier: params,
+    });
+
+    if (statusCode === HttpStatus.ACCEPTED) {
+      throw new HttpException(data, HttpStatus.ACCEPTED);
+    }
+
+    return data;
   }
 }

@@ -1,6 +1,7 @@
 import { BaseEntity } from 'src/core/entities/base.entity';
+import { Poem } from 'src/poem/entities/poem.entity';
 import { User } from 'src/user/entities/user.entity';
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToOne } from 'typeorm';
 
 @Entity('journals')
 export class Journal extends BaseEntity {
@@ -10,6 +11,12 @@ export class Journal extends BaseEntity {
   @ManyToOne(() => User, (user) => user.journals)
   @JoinColumn({ name: 'user_id' })
   user: User;
+
+  @OneToOne(() => Poem, (poem) => poem.journal, {
+    cascade: ['insert', 'update', 'soft-remove'],
+    nullable: true,
+  })
+  poem: Poem;
 
   @Column({
     type: 'varchar',

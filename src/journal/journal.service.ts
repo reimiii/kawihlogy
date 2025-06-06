@@ -1,32 +1,47 @@
+import { InjectQueue } from '@nestjs/bullmq';
 import {
+  ConflictException,
   ForbiddenException,
+  HttpStatus,
   Injectable,
   Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
+import { Queue } from 'bullmq';
+import { jobId } from 'src/core/job-id.util';
+import {
+  PoemJobName,
+  PoemStrings,
+} from 'src/poem/constants/poem-strings.constant';
+import { PoemService } from 'src/poem/poem.service';
+import { PoemJobData } from 'src/poem/types/poem.type';
 import { DataSource } from 'typeorm';
 import { CreateJournalCommand } from './commands/create-journal.command';
 import { DeleteJournalCommand } from './commands/delete-journal.command';
 import { UpdateJournalCommand } from './commands/update-journal.command';
+import { JournalPaginationQueryDto } from './dto/journal-paginate-request.dto';
+import { Journal } from './entities/journal.entity';
+import { JournalRepository } from './repositories/journal.repository';
 import {
   CreateJournalOptions,
   DeleteJournalOptions,
   FindOneJournalOptions,
+  QueuePoemTriggerOpts,
   UpdateJournalOptions,
 } from './types/journal.type';
-import { JournalRepository } from './repositories/journal.repository';
-import { Journal } from './entities/journal.entity';
-import { JournalPaginationQueryDto } from './dto/journal-paginate-request.dto';
 
 @Injectable()
 export class JournalService {
   private readonly logger = new Logger(JournalService.name);
 
   constructor(
+    @InjectQueue(PoemStrings.POEM_QUEUE)
+    private poemQueue: Queue<PoemJobData, void, PoemJobName>,
     private readonly repo: JournalRepository,
     private readonly moduleRef: ModuleRef,
     private readonly ds: DataSource,
+    private readonly poemService: PoemService,
   ) {}
 
   /**
@@ -101,7 +116,7 @@ export class JournalService {
       relations: { user: true },
     });
 
-    if (!res) throw new NotFoundException('User Not Found');
+    if (!res) throw new NotFoundException('Journal Not Found');
 
     if (res.isPrivate && res.userId !== params.accessBy.id)
       throw new ForbiddenException('Access Denied');
@@ -153,5 +168,52 @@ export class JournalService {
     });
 
     this.logger.log('finish: remove journal');
+  }
+
+  async triggerPoemQueue(options: QueuePoemTriggerOpts) {
+    const journal = await this.repo.findOneUnique({
+      by: { key: 'id', value: options.identifier.id },
+    });
+
+    if (!journal) throw new NotFoundException('Journal Not Found');
+
+    if (journal.userId !== options.by.id)
+      throw new ForbiddenException('Access Denied');
+
+    const poem = await this.poemService.findOne({
+      by: { key: 'journalId', value: journal.id },
+      withDeleted: true,
+    });
+
+    if (!poem) throw new NotFoundException('Poem Not Found');
+
+    if (!poem.deletedAt) throw new ConflictException('Poem Already Exist');
+
+    const identifier = jobId(
+      PoemStrings.POEM_QUEUE,
+      PoemStrings.JOBS.TEXT,
+      journal.id,
+    );
+
+    const jobNow = await this.poemQueue.getJob(identifier);
+
+    if (jobNow) {
+      const state = await jobNow.getState(); // waiting / active / completed
+      return {
+        statusCode: state === 'completed' ? HttpStatus.OK : HttpStatus.ACCEPTED,
+        data: { jobId: jobNow.id, state },
+      };
+    }
+
+    const jobNew = await this.poemQueue.add(
+      PoemStrings.JOBS.TEXT,
+      { journalId: journal.id, requestedBy: options.by },
+      { jobId: identifier, removeOnComplete: { age: 3600 } },
+    );
+
+    return {
+      statusCode: HttpStatus.ACCEPTED,
+      data: { jobId: jobNew.id, state: 'waiting' },
+    };
   }
 }

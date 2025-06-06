@@ -3,6 +3,7 @@ import { CreateJournalDto } from '../dto/create-journal.dto';
 import { UpdateJournalDto } from '../dto/update-journal.dto';
 import { JournalIdDto } from '../dto/journal-id.dto';
 import { EntityManager } from 'typeorm';
+import { ActionOpts } from 'src/core/types/option.types';
 
 export interface CreateJournalOptions {
   payload: CreateJournalDto;
@@ -24,6 +25,8 @@ export interface FindOneJournalOptions {
   identifier: JournalIdDto;
   accessBy: UserClaims;
 }
+
+export type QueuePoemTriggerOpts = ActionOpts<JournalIdDto>;
 
 export interface CreateJournalCommandOptions extends CreateJournalOptions {
   entityManager: EntityManager;
