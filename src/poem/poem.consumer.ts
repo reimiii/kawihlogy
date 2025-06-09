@@ -1,31 +1,58 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
-import { PoemJobName, PoemStrings } from './constants/poem-strings.constant';
+import { Inject, Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
-import { setTimeout } from 'node:timers/promises';
+import { DataSource } from 'typeorm';
+import { HandleGeneratePoemCommand } from './commands/handle-generate-poem.command';
+import { PoemJobName, PoemStrings } from './constants/poem-strings.constant';
 import { PoemJobData } from './types/poem.type';
 
 @Processor(PoemStrings.POEM_QUEUE)
 export class PoemConsumer extends WorkerHost {
+  private readonly logger = new Logger(PoemConsumer.name);
+
+  @Inject()
+  private readonly handlerGenerateText: HandleGeneratePoemCommand;
+
+  @Inject()
+  private readonly ds: DataSource;
+
   async process(
     job: Job<PoemJobData, void, PoemJobName>,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     token?: string,
   ): Promise<void> {
-    await setTimeout(1000);
-
     switch (job.name) {
       case 'text': {
-        console.log('this is text');
-        console.info(job.data);
-        console.info(job.id);
-        console.info('token', token);
+        await this.handleText(job);
         break;
       }
       case 'audio': {
-        console.log('audioss');
+        this.logger.debug(
+          `Audio job ${job.id} is not implemented yet, skipping processing.`,
+        );
         break;
       }
       default:
         job.name satisfies never;
     }
+  }
+
+  private async handleText(job: Job<PoemJobData, void, PoemJobName>) {
+    this.logger.log(`Processing text generation for job ${job.id}`);
+    await this.ds
+      .transaction(async (tx) => {
+        await this.handlerGenerateText.execute({
+          jobData: job.data,
+          entityManager: tx,
+        });
+      })
+      .catch((err) => {
+        if (err instanceof Error) {
+          this.logger.error(
+            `Error processing job ${job.id} with name ${job.name}: ${err.message}`,
+            err.stack,
+          );
+        }
+      });
   }
 }

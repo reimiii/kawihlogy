@@ -10,6 +10,7 @@ import {
 import { ModuleRef } from '@nestjs/core';
 import { Queue } from 'bullmq';
 import { jobId } from 'src/core/job-id.util';
+import { FindOneOptionsBy } from 'src/core/repositories/utils/find-one.util';
 import {
   PoemJobName,
   PoemStrings,
@@ -43,6 +44,10 @@ export class JournalService {
     private readonly ds: DataSource,
     private readonly poemService: PoemService,
   ) {}
+
+  async findOne(params: FindOneOptionsBy<Journal, 'id'>) {
+    return await this.repo.findOneUnique(params);
+  }
 
   /**
    * Creates a new journal entry in the system
@@ -185,9 +190,8 @@ export class JournalService {
       withDeleted: true,
     });
 
-    if (!poem) throw new NotFoundException('Poem Not Found');
-
-    if (!poem.deletedAt) throw new ConflictException('Poem Already Exist');
+    if (poem && !poem.deletedAt)
+      throw new ConflictException('Poem Already Exist');
 
     const identifier = jobId(
       PoemStrings.POEM_QUEUE,
@@ -208,7 +212,7 @@ export class JournalService {
     const jobNew = await this.poemQueue.add(
       PoemStrings.JOBS.TEXT,
       { journalId: journal.id, requestedBy: options.by },
-      { jobId: identifier, removeOnComplete: { age: 3600 } },
+      { jobId: identifier, removeOnComplete: true },
     );
 
     return {

@@ -8,6 +8,7 @@ export const GoogleGenAIProvider: Provider<GoogleGenAI> = {
     const ai = new GoogleGenAI({
       apiKey: env.get('GEMINI_API_KEY'),
     });
+
     return ai;
   },
   inject: [EnvService],
