@@ -1,6 +1,7 @@
 import { BaseEntity } from 'src/core/entities/base.entity';
 import { Journal } from 'src/journal/entities/journal.entity';
 import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
+import { PoemContentPayload } from '../types/poem.type';
 
 @Entity('poems')
 export class Poem extends BaseEntity {
@@ -11,6 +12,6 @@ export class Poem extends BaseEntity {
   @JoinColumn({ name: 'journal_id' })
   journal: Journal;
 
-  @Column({ type: 'text' })
-  content: string;
+  @Column({ type: 'json' })
+  content: PoemContentPayload;
 }

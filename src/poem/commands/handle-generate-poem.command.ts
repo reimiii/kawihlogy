@@ -10,7 +10,13 @@ import { Journal } from 'src/journal/entities/journal.entity';
 import { JournalService } from 'src/journal/journal.service';
 import { Poem } from '../entities/poem.entity';
 import { PoemRepository } from '../repositories/poem.repository';
-import { HandlePoemOpts } from '../types/poem.type';
+import {
+  HandlePoemOpts,
+  PoemContentPayload,
+  PoemContentPayloadSchema,
+} from '../types/poem.type';
+import z from 'zod/v4';
+import { JsonSchema } from 'src/core/types/zod.types';
 
 /**
  * Command handler for generating a poem from a journal entry.
@@ -34,7 +40,7 @@ export class HandleGeneratePoemCommand {
   /** Prompt string for the LLM */
   private _prompt: string;
   /** The generated poem content */
-  private _generatedPoem: string | undefined;
+  private _generatedPoem: PoemContentPayload;
   /** The poem entity (if found) */
   private _poem: Poem;
 
@@ -100,7 +106,7 @@ export class HandleGeneratePoemCommand {
   /**
    * Returns the generated poem or throws if not initialized.
    */
-  private get generatedPoem(): string {
+  private get generatedPoem(): PoemContentPayload {
     if (!this._generatedPoem)
       throw new InternalServerErrorException(
         `${this.generatingJournalToPoem.name} Not Initialize Or Try Again`,
@@ -287,7 +293,21 @@ export class HandleGeneratePoemCommand {
       responseSchema: this.poemJsonSchema,
     });
 
-    this._generatedPoem = chat;
+    const chatParse = JsonSchema.safeParse(chat);
+
+    if (!chatParse.success) {
+      this.logger.error(z.prettifyError(chatParse.error));
+      throw new Error(`Response from LLM is not valid JSON, Try again!`);
+    }
+
+    const res = PoemContentPayloadSchema.safeParse(JSON.parse(chat!));
+
+    if (!res.success) {
+      this.logger.error(z.prettifyError(res.error));
+      throw new Error(`Invalid poem response: ${z.prettifyError(res.error)}`);
+    }
+
+    this._generatedPoem = res.data;
   }
 
   /**
