@@ -1,20 +1,14 @@
-import {
-  Injectable,
-  Logger,
-  NotFoundException,
-  OnModuleInit,
-} from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
+import { User } from 'src/user/entities/user.entity';
+import { UserService } from 'src/user/user.service';
 import { DataSource } from 'typeorm';
 import { LoginCommand } from './commands/login.command';
 import { RegisterCommand } from './commands/register.command';
-import { RolesPermissions } from './constants/roles-permissions.map';
 import { JwtToken, LoginOptions, RegisterOptions } from './types/auth.type';
-import { User } from 'src/user/entities/user.entity';
-import { UserService } from 'src/user/user.service';
 
 @Injectable()
-export class AuthService implements OnModuleInit {
+export class AuthService {
   private readonly logger = new Logger(AuthService.name);
 
   constructor(
@@ -22,11 +16,6 @@ export class AuthService implements OnModuleInit {
     private readonly moduleRef: ModuleRef,
     private readonly ds: DataSource,
   ) {}
-
-  onModuleInit() {
-    console.log(Object.keys(RolesPermissions['echo']));
-    console.log(RolesPermissions);
-  }
 
   async login(params: LoginOptions): Promise<JwtToken> {
     this.logger.log('start auth login');
