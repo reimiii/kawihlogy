@@ -5,7 +5,7 @@ import {
   Logger,
   Scope,
 } from '@nestjs/common';
-import { GeminiService } from 'src/gemini/gemini.service';
+import { GeminiService } from 'src/_infrastructure/gemini/gemini.service';
 import { Journal } from 'src/journal/entities/journal.entity';
 import { JournalService } from 'src/journal/journal.service';
 import { Poem } from '../entities/poem.entity';

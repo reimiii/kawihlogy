@@ -6,7 +6,7 @@ import { BullModule } from '@nestjs/bullmq';
 import { PoemStrings } from './constants/poem-strings.constant';
 import { PoemConsumer } from './poem.consumer';
 import { HandleGeneratePoemCommand } from './commands/handle-generate-poem.command';
-import { GeminiModule } from 'src/gemini/gemini.module';
+import { GeminiModule } from 'src/_infrastructure/gemini/gemini.module';
 import { JournalModule } from 'src/journal/journal.module';
 
 @Module({
