@@ -1,9 +1,8 @@
 import { UserClaims } from 'src/auth/types/jwt-payload.type';
-import { CreateJournalDto } from '../dto/create-journal.dto';
-import { UpdateJournalDto } from '../dto/update-journal.dto';
-import { JournalIdDto } from '../dto/journal-id.dto';
 import { EntityManager } from 'typeorm';
-import { ActionOpts } from 'src/core/types/option.types';
+import { CreateJournalDto } from '../dto/create-journal.dto';
+import { JournalIdDto } from '../dto/journal-id.dto';
+import { UpdateJournalDto } from '../dto/update-journal.dto';
 
 export interface CreateJournalOptions {
   payload: CreateJournalDto;
@@ -25,8 +24,6 @@ export interface FindOneJournalOptions {
   identifier: JournalIdDto;
   accessBy: UserClaims;
 }
-
-export type QueuePoemTriggerOpts = ActionOpts<JournalIdDto>;
 
 export interface CreateJournalCommandOptions extends CreateJournalOptions {
   entityManager: EntityManager;

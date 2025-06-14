@@ -14,6 +14,9 @@ export const BullModule = BM.forRootAsync({
         host: host,
         port: port,
       },
+      defaultJobOptions: {
+        removeOnFail: true,
+      },
     };
   },
 });

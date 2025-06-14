@@ -5,8 +5,6 @@ import {
   Delete,
   Get,
   HttpCode,
-  HttpException,
-  HttpStatus,
   Logger,
   Param,
   Patch,
@@ -23,18 +21,18 @@ import {
   CreateJournalDto,
   CreateJournalSchema,
 } from './dto/create-journal.dto';
+import { JournalIdDto, JournalIdSchema } from './dto/journal-id.dto';
+import { JournalPaginateListResponse } from './dto/journal-paginate-list-response.dto';
+import {
+  JournalPaginationQueryDto,
+  JournalPaginationQuerySchema,
+} from './dto/journal-paginate-request.dto';
+import { JournalResponseDto } from './dto/journal-response.dto';
 import {
   UpdateJournalDto,
   UpdateJournalSchema,
 } from './dto/update-journal.dto';
 import { JournalService } from './journal.service';
-import { JournalIdDto, JournalIdSchema } from './dto/journal-id.dto';
-import { JournalResponseDto } from './dto/journal-response.dto';
-import {
-  JournalPaginationQueryDto,
-  JournalPaginationQuerySchema,
-} from './dto/journal-paginate-request.dto';
-import { JournalPaginateListResponse } from './dto/journal-paginate-list-response.dto';
 
 /**
  * Controller responsible for handling HTTP requests related to journal operations
@@ -156,23 +154,5 @@ export class JournalController {
     });
 
     this.logger.log('Finished delete journal');
-  }
-
-  @HttpCode(200)
-  @Post(':id/poem/queue')
-  async createQueuePoem(
-    @Param(new ZodValidationPipe(JournalIdSchema)) params: JournalIdDto,
-    @Identity() createBy: UserClaims,
-  ) {
-    const { data, statusCode } = await this.journalService.triggerPoemQueue({
-      by: createBy,
-      identifier: params,
-    });
-
-    if (statusCode === HttpStatus.ACCEPTED) {
-      throw new HttpException(data, HttpStatus.ACCEPTED);
-    }
-
-    return data;
   }
 }

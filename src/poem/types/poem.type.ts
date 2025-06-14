@@ -1,6 +1,8 @@
 import { UserClaims } from 'src/auth/types/jwt-payload.type';
+import { ActionOpts } from 'src/core/types/option.types';
 import { EntityManager } from 'typeorm';
 import { z } from 'zod/v4';
+import { CreatePoemDto } from '../dto/create-poem.dto';
 export interface GeneratePoemData {
   journalId: string;
   requestedBy: UserClaims;
@@ -19,3 +21,5 @@ export const PoemContentPayloadSchema = z.object({
 });
 
 export type PoemContentPayload = z.infer<typeof PoemContentPayloadSchema>;
+
+export type QueuePoemTriggerOpts = ActionOpts<CreatePoemDto>;

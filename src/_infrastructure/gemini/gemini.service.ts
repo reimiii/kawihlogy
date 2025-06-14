@@ -35,64 +35,12 @@ export class GeminiService {
     return response.text;
   }
 
-  //   async onModuleInit() {
-  //     const poemSchema: Schema = {
-  //       type: Type.OBJECT,
-  //       properties: {
-  //         title: {
-  //           type: Type.STRING,
-  //         },
-  //         stanzas: {
-  //           type: Type.ARRAY,
-  //           items: {
-  //             type: Type.ARRAY,
-  //             items: {
-  //               type: Type.STRING,
-  //             },
-  //           },
-  //         },
-  //       },
-  //       required: ['title', 'stanzas'],
-  //       propertyOrdering: ['title', 'stanzas'],
-  //     };
+  async countTokens(prompt: string): Promise<number | undefined> {
+    const response = await this.ai.models.countTokens({
+      model: 'gemini-1.5-pro',
+      contents: prompt,
+    });
 
-  //     const r = await this.generateText({
-  //       prompt: `
-  // I have a journal text with a maximum length of 5,000 characters: "Today I felt exhausted after a long day of work, but watching the sunset by the beach calmed me. I reflected on life and how time slips away so quickly."
-
-  // From this journal, create a poem in English that:
-  // 1. Highlights the following topics: [sunset, life reflection, time].
-  // 2. Conveys the following emotions: [exhaustion, calm, melancholic].
-  // 3. Is written in a free-verse style, with 3-4 stanzas, each containing 4-6 lines.
-  // 4. Uses poetic language with vivid natural imagery and deep metaphors.
-  // 5. Maintains a reflective and slightly melancholic tone.
-
-  // Do not alter the facts from the journal, but transform the narrative into a flowing, emotional poem. Optionally, draw inspiration from the style of poets like Mary Oliver, focusing on simple yet profound language. Ensure the poem feels natural and emotionally resonant.`.trim(),
-  //       responseMimeType: 'text/plain',
-  //       // responseSchema: poemSchema,
-  //     });
-
-  //     const j = await this.generateText({
-  //       prompt: `
-  // I have a journal text with a maximum length of 5,000 characters: "Today I felt exhausted after a long day of work, but watching the sunset by the beach calmed me. I reflected on life and how time slips away so quickly."
-
-  // From this journal, create a poem in English that:
-  // 1. Highlights the following topics: [sunset, life reflection, time].
-  // 2. Conveys the following emotions: [exhaustion, calm, melancholic].
-  // 3. Is written in a free-verse style, with 3-4 stanzas, each containing 4-6 lines.
-  // 4. Uses poetic language with vivid natural imagery and deep metaphors.
-  // 5. Maintains a reflective and slightly melancholic tone.
-
-  // Do not alter the facts from the journal, but transform the narrative into a flowing, emotional poem. Optionally, draw inspiration from the style of poets like Mary Oliver, focusing on simple yet profound language. Ensure the poem feels natural and emotionally resonant.`.trim(),
-  //       responseMimeType: 'application/json',
-  //       responseSchema: poemSchema,
-  //     });
-
-  //     console.log(this.safetySettings);
-  //     console.log(this.generatorConf);
-  //     console.log(' nice thing ');
-  //     console.log(r);
-
-  //     console.log(JSON.stringify(JSON.parse(j!), null, 2));
-  //   }
+    return response.totalTokens;
+  }
 }
