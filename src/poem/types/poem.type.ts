@@ -23,3 +23,24 @@ export const PoemContentPayloadSchema = z.object({
 export type PoemContentPayload = z.infer<typeof PoemContentPayloadSchema>;
 
 export type QueuePoemTriggerOpts = ActionOpts<CreatePoemDto>;
+
+export type PoemState =
+  | {
+      status: 'added';
+    }
+  | {
+      status: 'processing';
+    }
+  | {
+      status: 'completed';
+    }
+  | {
+      status: 'failed';
+      error: string;
+    }
+  | {
+      status: 'waiting';
+    }
+  | {
+      status: 'active';
+    };

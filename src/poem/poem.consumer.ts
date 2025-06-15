@@ -6,7 +6,9 @@ import { HandleGeneratePoemCommand } from './commands/handle-generate-poem.comma
 import { PoemJobName, PoemStrings } from './constants/poem-strings.constant';
 import { PoemJobData } from './types/poem.type';
 
-@Processor(PoemStrings.POEM_QUEUE)
+@Processor(PoemStrings.POEM_QUEUE, {
+  concurrency: 5,
+})
 export class PoemConsumer extends WorkerHost {
   private readonly logger = new Logger(PoemConsumer.name);
 
@@ -21,6 +23,8 @@ export class PoemConsumer extends WorkerHost {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     token?: string,
   ): Promise<void> {
+    this.logger.log(`Processing job ${job.id} of type ${job.name}`);
+
     switch (job.name) {
       case 'text': {
         await this.handleText(job);
@@ -47,12 +51,7 @@ export class PoemConsumer extends WorkerHost {
         });
       })
       .catch((err) => {
-        if (err instanceof Error) {
-          this.logger.error(
-            `Error processing job ${job.id} with name ${job.name}: ${err.message}`,
-            err.stack,
-          );
-        }
+        throw err;
       });
   }
 }
