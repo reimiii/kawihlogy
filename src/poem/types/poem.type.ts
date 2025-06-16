@@ -3,8 +3,9 @@ import { ActionOpts } from 'src/core/types/option.types';
 import { EntityManager } from 'typeorm';
 import { z } from 'zod/v4';
 import { CreatePoemDto } from '../dto/create-poem.dto';
+import { PoemIdDto } from '../dto/poem-id.dto';
 export interface GeneratePoemData {
-  journalId: string;
+  identifier: string;
   requestedBy: UserClaims;
 }
 
@@ -23,6 +24,7 @@ export const PoemContentPayloadSchema = z.object({
 export type PoemContentPayload = z.infer<typeof PoemContentPayloadSchema>;
 
 export type QueuePoemTriggerOpts = ActionOpts<CreatePoemDto>;
+export type QueuePoemAudioTriggerOpts = ActionOpts<PoemIdDto>;
 
 export type PoemState =
   | {

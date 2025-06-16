@@ -5,6 +5,7 @@ import {
   HttpCode,
   HttpException,
   HttpStatus,
+  Param,
   Post,
   UseGuards,
   UseInterceptors,
@@ -15,6 +16,7 @@ import { Identity } from 'src/core/decorators/identity.decorator';
 import { ZodValidationPipe } from 'src/core/pipes/zod-validation.pipe';
 import { CreatePoemDto, CreatePoemSchema } from './dto/create-poem.dto';
 import { PoemService } from './poem.service';
+import { PoemIdDto, PoemIdSchema } from './dto/poem-id.dto';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @UseGuards(JwtAuthGuard)
@@ -24,13 +26,31 @@ export class PoemController {
 
   @HttpCode(200)
   @Post()
-  async createQueuePoem(
+  async createQueuePoemText(
     @Body(new ZodValidationPipe(CreatePoemSchema)) body: CreatePoemDto,
     @Identity() createBy: UserClaims,
   ) {
-    const { data, statusCode } = await this.poemService.triggerPoemQueue({
+    const { data, statusCode } = await this.poemService.triggerPoemTextQueue({
       by: createBy,
       identifier: body,
+    });
+
+    if (statusCode === HttpStatus.ACCEPTED) {
+      throw new HttpException(data, HttpStatus.ACCEPTED);
+    }
+
+    return data;
+  }
+
+  @HttpCode(200)
+  @Post(':id/audio')
+  async createQueuePoemAudio(
+    @Param(new ZodValidationPipe(PoemIdSchema)) param: PoemIdDto,
+    @Identity() createBy: UserClaims,
+  ) {
+    const { data, statusCode } = await this.poemService.triggerPoemAudioQueue({
+      by: createBy,
+      identifier: param,
     });
 
     if (statusCode === HttpStatus.ACCEPTED) {

@@ -154,7 +154,7 @@ export class HandleGeneratePoemCommand {
    */
   private async loadJournalOrFail() {
     const {
-      jobData: { journalId },
+      jobData: { identifier: journalId },
       entityManager,
     } = this._context;
 

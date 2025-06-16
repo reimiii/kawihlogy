@@ -1,13 +1,13 @@
 import { NestFactory } from '@nestjs/core';
 import dayjs from 'dayjs';
-import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
+import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import { EnvService } from './_infrastructure/env/env.service';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
-    logger: ['error', 'warn', 'log'],
+    logger: ['error', 'warn', 'log', 'debug', 'verbose', 'fatal'],
   });
 
   const config = app.get(EnvService);
@@ -23,4 +23,5 @@ async function bootstrap() {
   await app.listen(port);
 }
 
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
 bootstrap();
