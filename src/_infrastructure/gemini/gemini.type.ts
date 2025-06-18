@@ -7,6 +7,9 @@ interface BaseParams {
   systemInstructor?: string;
 }
 
+type VoiceName = 'Zephyr' | 'Kore' | 'Charon';
+type LanguageCode = 'en-US';
+
 interface PlainTextParams extends BaseParams {
   responseMimeType: 'text/plain'; // default
 }
@@ -17,3 +20,20 @@ interface JsonParams extends BaseParams {
 }
 
 export type GenerateTextParams = PlainTextParams | JsonParams;
+
+export type GenerateAudioParam = BaseParams & {
+  voiceName: VoiceName;
+  language: LanguageCode;
+};
+
+export interface WavConversionOptions {
+  numChannels: number;
+  sampleRate: number;
+  bitsPerSample: number;
+}
+
+export interface TtsBuff {
+  buffer: Buffer;
+  mimeType: string;
+  ext: string;
+}

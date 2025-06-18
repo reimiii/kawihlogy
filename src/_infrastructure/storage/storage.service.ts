@@ -1,17 +1,16 @@
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
-import { Injectable } from '@nestjs/common';
+import {
+  DeleteObjectCommand,
+  PutObjectCommand,
+  S3Client,
+  waitUntilObjectNotExists,
+} from '@aws-sdk/client-s3';
+import { Injectable, Logger } from '@nestjs/common';
 import { EnvService } from '../env/env.service';
-import { Readable } from 'stream';
-
-interface S3OperationParams {
-  key: string; // S3 object key (e.g., file path in bucket)
-  body?: string | Buffer | Readable; // File content for upload (optional for delete/list)
-  contentType?: string; // MIME type for uploads (optional)
-  metadata?: Record<string, string>; // Optional metadata for the object
-}
+import { S3OperationParams } from './storage.type';
 
 @Injectable()
 export class StorageService {
+  private readonly logger = new Logger(StorageService.name);
   private readonly storageBucketName: string;
 
   constructor(
@@ -28,8 +27,33 @@ export class StorageService {
       Key: opts.key,
       ContentType: opts.contentType,
     });
+
     await this.client.send(command);
+
+    return {
+      key: opts.key,
+    };
   }
-  delete() {}
+
+  async delete(opts: Pick<S3OperationParams, 'key'>) {
+    const command = new DeleteObjectCommand({
+      Bucket: this.storageBucketName,
+      Key: opts.key,
+    });
+
+    await this.client.send(command);
+
+    await waitUntilObjectNotExists(
+      {
+        client: this.client,
+        maxWaitTime: 5000,
+      },
+      {
+        Bucket: this.storageBucketName,
+        Key: opts.key,
+      },
+    );
+  }
+
   findOne() {}
 }

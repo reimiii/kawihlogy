@@ -93,7 +93,7 @@ export class PoemService {
       throw new NotAcceptableException('Try again later');
     }
 
-    if (token < 200) {
+    if (token < 100) {
       this.logger.warn(
         `Not enough tokens (${token}) to generate poem for journalId: ${journal.id}`,
       );
@@ -188,7 +188,17 @@ export class PoemService {
     const jobNew = await this.poemQueue.add(
       PoemStrings.JOBS.AUDIO,
       { identifier: poem.id, requestedBy: options.by },
-      { jobId: identifier, removeOnComplete: 60 * 60, removeOnFail: 5 * 60 }, // 1 hour on complete, 5 minutes on fail
+      {
+        jobId: identifier,
+        removeOnComplete: true,
+        removeOnFail: true,
+        delay: 2000,
+        attempts: 3,
+        backoff: {
+          type: 'exponential', // atau 'fixed'
+          delay: 5000, // 5 detik antara retry
+        },
+      }, // 1 hour on complete, 5 minutes on fail
     );
 
     this.logger.log(

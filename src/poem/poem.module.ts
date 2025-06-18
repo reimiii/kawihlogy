@@ -10,11 +10,14 @@ import { PoemService } from './poem.service';
 import { PoemRepository } from './repositories/poem.repository';
 import { PoemEventsListener } from './poem.events-listener';
 import { PoemGateway } from './poem.gateway';
+import { HandleGeneratePoemAudioCommand } from './commands/handle-generate-poem-audio.command';
+import { FileModule } from 'src/_infrastructure/file/file.module';
 
 @Module({
   imports: [
     GeminiModule,
     JournalModule,
+    FileModule,
     BullModule.registerQueue({
       name: PoemStrings.POEM_QUEUE,
     }),
@@ -27,6 +30,7 @@ import { PoemGateway } from './poem.gateway';
     PoemConsumer,
     PoemEventsListener,
     HandleGeneratePoemCommand,
+    HandleGeneratePoemAudioCommand,
   ],
   exports: [PoemService],
 })
