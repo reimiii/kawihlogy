@@ -1,0 +1,83 @@
+import { Processor, WorkerHost } from '@nestjs/bullmq';
+import { Logger, Inject } from '@nestjs/common';
+import { ModuleRef } from '@nestjs/core';
+import { Job } from 'bullmq';
+import { HandleGeneratePoemAudioCommand } from 'src/poem/commands/handle-generate-poem-audio.command';
+import { HandleGeneratePoemCommand } from 'src/poem/commands/handle-generate-poem.command';
+import {
+  PoemStrings,
+  PoemJobName,
+} from 'src/poem/constants/poem-strings.constant';
+import { PoemJobData } from 'src/poem/types/poem.type';
+import { DataSource } from 'typeorm';
+
+@Processor(PoemStrings.POEM_QUEUE, {
+  concurrency: 5,
+  lockDuration: 5 * 60 * 1000,
+})
+export class PoemProcessor extends WorkerHost {
+  private readonly logger = new Logger(PoemProcessor.name);
+
+  @Inject()
+  private readonly moduleRef: ModuleRef;
+
+  @Inject()
+  private readonly ds: DataSource;
+
+  async process(
+    job: Job<PoemJobData, void, PoemJobName>,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    token?: string,
+  ): Promise<void> {
+    this.logger.log(`Processing job ${job.id} of type ${job.name}`);
+
+    switch (job.name) {
+      case 'text': {
+        this.logger.debug(`Woops got text job with jobId: ${job.id}`);
+        await this.handleText(job);
+        break;
+      }
+      case 'audio': {
+        this.logger.debug(`Chihuyy got audio job with jobId: ${job.id}`);
+        await this.handleAudio(job);
+        break;
+      }
+      default:
+        job.name satisfies never;
+    }
+  }
+
+  private async handleText(job: Job<PoemJobData, void, PoemJobName>) {
+    this.logger.log(`Processing text generation for job ${job.id}`);
+    await this.ds
+      .transaction(async (tx) => {
+        const command = await this.moduleRef.resolve(HandleGeneratePoemCommand);
+        await command.execute({
+          jobData: job.data,
+          entityManager: tx,
+        });
+      })
+      .catch((err) => {
+        this.logger.error(err);
+        throw err;
+      });
+  }
+
+  private async handleAudio(job: Job<PoemJobData, void, PoemJobName>) {
+    this.logger.log(`Processing Audio Generation For JobId: ${job.id}`);
+    await this.ds
+      .transaction(async (tx) => {
+        const command = await this.moduleRef.resolve(
+          HandleGeneratePoemAudioCommand,
+        );
+        await command.execute({
+          jobData: job.data,
+          entityManager: tx,
+        });
+      })
+      .catch((error) => {
+        this.logger.error(error);
+        throw error;
+      });
+  }
+}

@@ -15,8 +15,8 @@ import { UserClaims } from 'src/auth/types/jwt-payload.type';
 import { Identity } from 'src/core/decorators/identity.decorator';
 import { ZodValidationPipe } from 'src/core/pipes/zod-validation.pipe';
 import { CreatePoemDto, CreatePoemSchema } from './dto/create-poem.dto';
-import { PoemService } from './poem.service';
 import { PoemIdDto, PoemIdSchema } from './dto/poem-id.dto';
+import { PoemService } from './poem.service';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @UseGuards(JwtAuthGuard)

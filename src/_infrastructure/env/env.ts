@@ -3,6 +3,7 @@ import { z } from 'zod';
 export const envSchema = z.object({
   SERVICE_NAME: z.string().max(70),
   PORT: z.coerce.number(),
+  WORKER_PORT: z.coerce.number(),
   NODE_ENV: z.enum(['development', 'production', 'test']),
 
   DB_TYPE: z.enum(['postgres', 'mysql']),
