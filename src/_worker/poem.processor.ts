@@ -2,14 +2,14 @@ import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger, Inject } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
 import { Job } from 'bullmq';
-import { HandleGeneratePoemAudioCommand } from 'src/poem/commands/handle-generate-poem-audio.command';
-import { HandleGeneratePoemCommand } from 'src/poem/commands/handle-generate-poem.command';
 import {
   PoemStrings,
   PoemJobName,
 } from 'src/poem/constants/poem-strings.constant';
 import { PoemJobData } from 'src/poem/types/poem.type';
 import { DataSource } from 'typeorm';
+import { HandleGeneratePoemAudioCommand } from './commands/handle-generate-poem-audio.command';
+import { HandleGeneratePoemCommand } from './commands/handle-generate-poem.command';
 
 @Processor(PoemStrings.POEM_QUEUE, {
   concurrency: 5,

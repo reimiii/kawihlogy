@@ -2,8 +2,8 @@ import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Inject, Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
 import { DataSource } from 'typeorm';
-import { HandleGeneratePoemAudioCommand } from './commands/handle-generate-poem-audio.command';
-import { HandleGeneratePoemCommand } from './commands/handle-generate-poem.command';
+// import { HandleGeneratePoemAudioCommand } from './commands/handle-generate-poem-audio.command';
+// import { HandleGeneratePoemCommand } from './commands/handle-generate-poem.command';
 import { PoemJobName, PoemStrings } from './constants/poem-strings.constant';
 import { PoemJobData } from './types/poem.type';
 import { ModuleRef } from '@nestjs/core';
@@ -48,11 +48,11 @@ export class PoemConsumer extends WorkerHost {
     this.logger.log(`Processing text generation for job ${job.id}`);
     await this.ds
       .transaction(async (tx) => {
-        const command = await this.moduleRef.resolve(HandleGeneratePoemCommand);
-        await command.execute({
-          jobData: job.data,
-          entityManager: tx,
-        });
+        // const command = await this.moduleRef.resolve(HandleGeneratePoemCommand);
+        // await command.execute({
+        //   jobData: job.data,
+        //   entityManager: tx,
+        // });
       })
       .catch((err) => {
         this.logger.error(err);
@@ -64,13 +64,13 @@ export class PoemConsumer extends WorkerHost {
     this.logger.log(`Processing Audio Generation For JobId: ${job.id}`);
     await this.ds
       .transaction(async (tx) => {
-        const command = await this.moduleRef.resolve(
-          HandleGeneratePoemAudioCommand,
-        );
-        await command.execute({
-          jobData: job.data,
-          entityManager: tx,
-        });
+        // const command = await this.moduleRef.resolve(
+        //   HandleGeneratePoemAudioCommand,
+        // );
+        // await command.execute({
+        //   jobData: job.data,
+        //   entityManager: tx,
+        // });
       })
       .catch((error) => {
         this.logger.error(error);

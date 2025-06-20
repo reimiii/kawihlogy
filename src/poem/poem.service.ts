@@ -193,11 +193,11 @@ export class PoemService {
         removeOnComplete: true,
         removeOnFail: true,
         delay: 2000,
-        attempts: 3,
-        backoff: {
-          type: 'exponential', // atau 'fixed'
-          delay: 5000, // 5 detik antara retry
-        },
+        // attempts: 3,
+        // backoff: {
+        //   type: 'exponential', // atau 'fixed'
+        //   delay: 5000, // 5 detik antara retry
+        // },
       }, // 1 hour on complete, 5 minutes on fail
     );
 

@@ -1,17 +1,14 @@
 import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
+import { FileModule } from 'src/_infrastructure/file/file.module';
 import { GeminiModule } from 'src/_infrastructure/gemini/gemini.module';
 import { JournalModule } from 'src/journal/journal.module';
-import { HandleGeneratePoemCommand } from './commands/handle-generate-poem.command';
 import { PoemStrings } from './constants/poem-strings.constant';
-import { PoemConsumer } from './poem.consumer';
 import { PoemController } from './poem.controller';
+import { PoemGateway } from './poem.gateway';
 import { PoemService } from './poem.service';
 import { PoemRepository } from './repositories/poem.repository';
 import { PoemEventsListener } from './poem.events-listener';
-import { PoemGateway } from './poem.gateway';
-import { HandleGeneratePoemAudioCommand } from './commands/handle-generate-poem-audio.command';
-import { FileModule } from 'src/_infrastructure/file/file.module';
 
 @Module({
   imports: [
@@ -27,10 +24,9 @@ import { FileModule } from 'src/_infrastructure/file/file.module';
     PoemGateway,
     PoemService,
     PoemRepository,
-    PoemConsumer,
     PoemEventsListener,
-    HandleGeneratePoemCommand,
-    HandleGeneratePoemAudioCommand,
+    // HandleGeneratePoemCommand,
+    // HandleGeneratePoemAudioCommand,
   ],
   exports: [PoemService],
 })

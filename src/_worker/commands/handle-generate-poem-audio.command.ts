@@ -123,11 +123,16 @@ export class HandleGeneratePoemAudioCommand {
   }
 
   private async createTtsBuffer() {
-    const { buffer, mimeType } = await this.geminiService.generateTts({
-      prompt: this.prompt,
-      voiceName: 'Charon',
-      language: 'en-US',
-    });
+    const { buffer, mimeType } = await this.geminiService
+      .generateTts({
+        prompt: this.prompt,
+        voiceName: 'Charon',
+        language: 'en-US',
+      })
+      .catch((error) => {
+        this.logger.error(error);
+        throw error;
+      });
 
     this._buffer = buffer;
     this._mimeType = mimeType;
