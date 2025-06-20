@@ -24,6 +24,14 @@ export class PoemProcessor extends WorkerHost {
   @Inject()
   private readonly ds: DataSource;
 
+  /**
+   * @method process
+   * @description Main job processing method for the PoemQueue.
+   * Dispatches jobs to specific handlers based on their `name`.
+   * @param job The object containing data and name.
+   * @param [token] An optional token (unused in this implementation).
+   * @returns A promise that resolves when the job processing is complete.
+   */
   async process(
     job: Job<PoemJobData, void, PoemJobName>,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -47,6 +55,14 @@ export class PoemProcessor extends WorkerHost {
     }
   }
 
+  /**
+   * @method handleText
+   * @description Handles 'text' type jobs, triggering the poem text generation process.
+   * It runs the command within a database transaction.
+   * @param job The object for text generation.
+   * @returns A promise that resolves after the text generation command is executed.
+   * @throws {Error} Throws any error encountered during the transaction or command execution.
+   */
   private async handleText(job: Job<PoemJobData, void, PoemJobName>) {
     this.logger.log(`Processing text generation for job ${job.id}`);
     await this.ds
@@ -63,6 +79,14 @@ export class PoemProcessor extends WorkerHost {
       });
   }
 
+  /**
+   * @method handleAudio
+   * @description Handles 'audio' type jobs, triggering the poem audio generation process.
+   * It runs the command within a database transaction.
+   * @param job The object for audio generation.
+   * @returns A promise that resolves after the audio generation command is executed.
+   * @throws {Error} Throws any error encountered during the transaction or command execution.
+   */
   private async handleAudio(job: Job<PoemJobData, void, PoemJobName>) {
     this.logger.log(`Processing Audio Generation For JobId: ${job.id}`);
     await this.ds
