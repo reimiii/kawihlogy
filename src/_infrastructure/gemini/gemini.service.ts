@@ -33,16 +33,21 @@ export class GeminiService {
       },
     });
 
-    const response = await chat.sendMessage({
-      message: opts.prompt,
-      config: {
-        responseMimeType: opts.responseMimeType,
-        responseSchema:
-          opts.responseMimeType === 'application/json'
-            ? opts.responseSchema
-            : undefined,
-      },
-    });
+    const response = await chat
+      .sendMessage({
+        message: opts.prompt,
+        config: {
+          responseMimeType: opts.responseMimeType,
+          responseSchema:
+            opts.responseMimeType === 'application/json'
+              ? opts.responseSchema
+              : undefined,
+        },
+      })
+      .catch((error) => {
+        this.logger.error(error);
+        throw error;
+      });
 
     this.logger.debug('Generated text response');
     return response.text;
@@ -76,45 +81,118 @@ export class GeminiService {
       });
 
     const buf: Buffer[] = [];
+    let chunkCount = 0;
+    let totalDataReceived = 0;
 
     for await (const chunk of res) {
-      const [candidate] = chunk.candidates ?? [];
-      const [part] = candidate?.content?.parts ?? [];
-      const inlineData = part?.inlineData;
+      chunkCount++;
+      this.logger.debug(`Processing chunk ${chunkCount}`);
 
-      if (!candidate || !part || !inlineData || !inlineData.data) {
-        this.logger.warn('Skipping incomplete chunk');
+      const [candidate] = chunk.candidates ?? [];
+
+      // More lenient chunk validation - check if we have any content
+      if (!candidate?.content?.parts?.length) {
+        this.logger.debug(`Chunk ${chunkCount}: No content parts, skipping`);
         continue;
       }
 
-      const { data: base64, mimeType } = inlineData;
-      const extension = mime.getExtension(mimeType || '');
+      for (const part of candidate.content.parts) {
+        const inlineData = part?.inlineData;
 
-      let buffer: Buffer;
-
-      if (extension) {
-        try {
-          buffer = Buffer.from(base64 || '', 'base64');
-        } catch (e) {
-          this.logger.warn('Base64 decode failed', e);
-          continue; // skip corrupted base64
-        }
-      } else {
-        buffer = this.convertToWav(base64 || '', mimeType || '');
-        if (!Buffer.isBuffer(buffer)) {
-          this.logger.error('Invalid buffer from convertToWav');
+        // Skip only if there's absolutely no data
+        if (!inlineData?.data) {
+          this.logger.debug(
+            `Chunk ${chunkCount}: No inline data, checking next part`,
+          );
           continue;
         }
+
+        const { data: base64, mimeType } = inlineData;
+        const extension = mime.getExtension(mimeType || '');
+
+        let buffer: Buffer;
+
+        if (extension) {
+          try {
+            buffer = Buffer.from(base64 || '', 'base64');
+            this.logger.debug(
+              `Chunk ${chunkCount}: Decoded ${buffer.length} bytes`,
+            );
+          } catch (e) {
+            this.logger.warn(
+              `Chunk ${chunkCount}: Base64 decode failed, attempting recovery`,
+              e,
+            );
+            // Try to clean base64 string and retry
+            try {
+              const cleanedBase64 = (base64 || '').replace(
+                /[^A-Za-z0-9+/=]/g,
+                '',
+              );
+              buffer = Buffer.from(cleanedBase64, 'base64');
+              this.logger.debug(
+                `Chunk ${chunkCount}: Recovery successful, decoded ${buffer.length} bytes`,
+              );
+            } catch (recoveryError) {
+              this.logger.error(
+                `Chunk ${chunkCount}: Recovery failed, skipping chunk`,
+                recoveryError,
+              );
+              continue;
+            }
+          }
+        } else {
+          try {
+            buffer = this.convertToWav(base64 || '', mimeType || '');
+            this.logger.debug(
+              `Chunk ${chunkCount}: Converted to WAV, ${buffer.length} bytes`,
+            );
+            if (!Buffer.isBuffer(buffer) || buffer.length === 0) {
+              this.logger.error(
+                `Chunk ${chunkCount}: Invalid buffer from convertToWav`,
+              );
+              continue;
+            }
+          } catch (conversionError) {
+            this.logger.error(
+              `Chunk ${chunkCount}: WAV conversion failed`,
+              conversionError,
+            );
+            continue;
+          }
+        }
+
+        if (buffer.length > 0) {
+          buf.push(buffer);
+          totalDataReceived += buffer.length;
+          this.logger.debug(
+            `Chunk ${chunkCount}: Added ${buffer.length} bytes, total: ${totalDataReceived}`,
+          );
+        }
       }
-      buf.push(buffer);
     }
+
+    this.logger.log(
+      `Stream completed: ${chunkCount} chunks processed, ${buf.length} buffers collected, ${totalDataReceived} total bytes`,
+    );
 
     const finalBuff = Buffer.concat(buf);
 
-    this.logger.debug(`Generated TTS audio buffer: ${finalBuff.length}`);
+    this.logger.log(
+      `Generated TTS audio buffer: ${(finalBuff.length / 1024).toFixed(2)} KB from ${buf.length} chunks, equal to ${(finalBuff.length / (1024 * 1024)).toFixed(2)} in Mb`,
+    );
 
     if (!finalBuff.length) {
-      throw new Error('TTS result is empty');
+      throw new Error(
+        `TTS result is empty - processed ${chunkCount} chunks but got no audio data`,
+      );
+    }
+
+    // Validate audio buffer has reasonable size (at least 1KB for meaningful audio)
+    if (finalBuff.length < 1024) {
+      this.logger.warn(
+        `TTS buffer seems unusually small: ${finalBuff.length} bytes`,
+      );
     }
 
     return {
