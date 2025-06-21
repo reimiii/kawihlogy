@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { DeletionOptions } from 'src/core/repositories/utils/archive.util';
 import { FindOneOptionsBy } from 'src/core/repositories/utils/find-one.util';
 import { PaginateOptions } from 'src/core/repositories/utils/paginate.util';
@@ -16,7 +16,15 @@ export class FileService {
   ) {}
 
   async findOne(params: FindOneOptionsBy<File, 'id'>) {
-    return await this.repo.findOneUnique(params);
+    const res = await this.repo.findOneUnique(params);
+
+    if (!res) throw new NotFoundException('File Not Found');
+
+    const url = await this.storageService.findOne({ key: res.key });
+
+    res.url = url;
+
+    return res;
   }
 
   async paginate(params: PaginateOptions<File>) {
@@ -40,10 +48,18 @@ export class FileService {
     });
   }
 
-  async delete(params: DeletionOptions<File, 'id' | 'key'>) {
+  async delete(params: DeletionOptions<File, 'id'>) {
+    const cur = await this.repo.findOneUnique({
+      by: { key: 'id', value: params.entity.id },
+      manager: params.manager,
+    });
+
+    if (!cur) throw new NotFoundException('File Not Found');
+
     const res = await this.repo.erase(params);
+
     await this.storageService.delete({
-      key: params.entity.key,
+      key: cur.key,
     });
 
     return res;

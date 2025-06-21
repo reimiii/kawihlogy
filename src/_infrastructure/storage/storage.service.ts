@@ -1,9 +1,11 @@
 import {
   DeleteObjectCommand,
+  GetObjectCommand,
   PutObjectCommand,
   S3Client,
   waitUntilObjectNotExists,
 } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { Injectable, Logger } from '@nestjs/common';
 import { EnvService } from '../env/env.service';
 import { S3OperationParams } from './storage.type';
@@ -55,5 +57,18 @@ export class StorageService {
     );
   }
 
-  findOne() {}
+  async findOne(opts: Pick<S3OperationParams, 'key'>): Promise<string> {
+    const command = new GetObjectCommand({
+      Bucket: this.storageBucketName,
+      Key: opts.key,
+    });
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+    const url = await getSignedUrl(this.client, command, {
+      expiresIn: 3600,
+    });
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return url;
+  }
 }
