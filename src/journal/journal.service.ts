@@ -75,7 +75,7 @@ export class JournalService {
         ...(params.userId && { userId: params.userId }),
       },
       order: {
-        createdAt: 'desc',
+        date: 'desc',
       },
       select: {
         user: {
@@ -103,7 +103,12 @@ export class JournalService {
     this.logger.log('start: find journal');
     const res = await this.repo.findOneUnique({
       by: { key: 'id', value: params.identifier.id },
-      relations: { user: true },
+      relations: {
+        user: true,
+        poem: {
+          file: true,
+        },
+      },
     });
 
     if (!res) throw new NotFoundException('Journal Not Found');
