@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { DeletionOptions } from 'src/core/repositories/utils/archive.util';
 import { FindOneOptionsBy } from 'src/core/repositories/utils/find-one.util';
 import { PaginateOptions } from 'src/core/repositories/utils/paginate.util';
@@ -10,10 +10,16 @@ import { StorageService } from '../storage/storage.service';
 
 @Injectable()
 export class FileService {
+  private readonly logger = new Logger(FileService.name);
   constructor(
     private readonly repo: FileRepository,
     private readonly storageService: StorageService,
   ) {}
+
+  async findKeyUrl(key: string) {
+    const url = await this.storageService.findOne({ key: key });
+    return url;
+  }
 
   async findOne(params: FindOneOptionsBy<File, 'id'>) {
     const res = await this.repo.findOneUnique(params);

@@ -19,6 +19,7 @@ import {
   FindOneJournalOptions,
   UpdateJournalOptions,
 } from './types/journal.type';
+import { FileService } from 'src/_infrastructure/file/file.service';
 
 @Injectable()
 export class JournalService {
@@ -27,6 +28,7 @@ export class JournalService {
   constructor(
     private readonly repo: JournalRepository,
     private readonly moduleRef: ModuleRef,
+    private readonly fileService: FileService,
     private readonly ds: DataSource,
   ) {}
 
@@ -115,6 +117,11 @@ export class JournalService {
 
     if (res.isPrivate && res.userId !== params.accessBy.id)
       throw new ForbiddenException('Access Denied');
+
+    if (res.poem.file) {
+      const r = await this.fileService.findKeyUrl(res.poem.file.key);
+      res.poem.file.url = r;
+    }
 
     this.logger.log('finish: find journal');
     return res;

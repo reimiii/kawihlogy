@@ -6,7 +6,7 @@ export class File extends AuditableEntity {
   @Column({ type: 'varchar' })
   key: string; // S3 object key (path in bucket)
 
-  url: string; // Public or signed URL
+  url: string | null; // Public or signed URL
 
   @Column({ name: 'mime_type', type: 'varchar', length: 128, nullable: true })
   mimeType?: string; // e.g. image/jpeg, application/pdf

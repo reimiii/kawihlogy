@@ -1,6 +1,7 @@
 import { UserClaims } from 'src/auth/types/jwt-payload.type';
 import { EntityManager } from 'typeorm';
 
+export type PickExcept<T, K extends keyof T> = Omit<T, K>;
 /*───────────────────────────────────────────────────────────────
   1. Tiny reusable mix-ins
   ───────────────────────────────────────────────────────────────*/

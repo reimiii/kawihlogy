@@ -4,14 +4,15 @@ import {
   PaginateResult,
 } from 'src/core/repositories/types/paginate-result.type';
 import { JournalResponseDto } from './journal-response.dto';
+import { PickExcept } from 'src/core/types/option.types';
 
 @Exclude()
 export class JournalPaginateListResponse
-  implements PaginateResult<JournalResponseDto>
+  implements PaginateResult<PickExcept<JournalResponseDto, 'poem'>>
 {
   @Expose()
   @Type(() => JournalResponseDto)
-  items: JournalResponseDto[];
+  items: PickExcept<JournalResponseDto, 'poem'>[];
 
   @Expose()
   meta: PaginateMeta;
