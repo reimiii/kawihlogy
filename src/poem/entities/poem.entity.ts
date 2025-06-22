@@ -14,11 +14,11 @@ export class Poem extends BaseEntity {
   journal: Journal;
 
   @Column({ name: 'file_id', type: 'uuid', nullable: true })
-  fileId: string;
+  fileId: string | null;
 
-  @OneToOne(() => File, { nullable: true, onDelete: 'CASCADE' })
+  @OneToOne(() => File, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'file_id' })
-  file: File;
+  file: File | null;
 
   @Column({ type: 'json' })
   content: PoemContentPayload;
