@@ -2,6 +2,7 @@ import {
   Body,
   ClassSerializerInterceptor,
   Controller,
+  Delete,
   HttpCode,
   HttpException,
   HttpStatus,
@@ -58,5 +59,29 @@ export class PoemController {
     }
 
     return data;
+  }
+
+  @HttpCode(204)
+  @Delete(':id')
+  async delete(
+    @Param(new ZodValidationPipe(PoemIdSchema)) param: PoemIdDto,
+    @Identity() accessBy: UserClaims,
+  ) {
+    await this.poemService.remove({
+      by: accessBy,
+      identifier: param,
+    });
+  }
+
+  @HttpCode(204)
+  @Delete(':id/file')
+  async deleteFile(
+    @Param(new ZodValidationPipe(PoemIdSchema)) param: PoemIdDto,
+    @Identity() accessBy: UserClaims,
+  ) {
+    await this.poemService.deleteFileOnly({
+      by: accessBy,
+      identifier: param,
+    });
   }
 }

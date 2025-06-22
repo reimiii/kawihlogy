@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import mime from 'mime';
 import { FileService } from 'src/_infrastructure/file/file.service';
+import { File } from 'src/_infrastructure/file/entities/file.entity';
 import { GeminiService } from 'src/_infrastructure/gemini/gemini.service';
 import { Poem } from 'src/poem/entities/poem.entity';
 import { PoemRepository } from 'src/poem/repositories/poem.repository';
@@ -20,6 +21,8 @@ export class HandleGeneratePoemAudioCommand {
   private _context!: HandlePoemOpts;
 
   private _poem: Poem;
+
+  private _file: File;
 
   private _prompt: string;
 
@@ -41,6 +44,12 @@ export class HandleGeneratePoemAudioCommand {
   private get poem(): Poem {
     if (!this._poem) throw new Error('Poem Not Initialized');
     return this._poem;
+  }
+
+  private get file(): File {
+    if (!this._file)
+      throw new Error(`${this.saveAudioFile.name} Not Initialized`);
+    return this._file;
   }
 
   private get buffer(): Buffer {
@@ -84,6 +93,9 @@ export class HandleGeneratePoemAudioCommand {
 
     this.logger.log('Handle Audio Upload S3');
     await this.uploadAudioAndPersitFile();
+
+    this.logger.log('save file id to poem');
+    await this.saveFileIdToPoem();
 
     this.logger.log('Poem generation audio finished');
   }
@@ -160,7 +172,7 @@ export class HandleGeneratePoemAudioCommand {
 
   private async saveAudioFile() {
     const { entityManager } = this._context;
-    await this.fileService.save(
+    const r = await this.fileService.save(
       {
         entity: {
           key: this.keyPath,
@@ -172,10 +184,22 @@ export class HandleGeneratePoemAudioCommand {
       },
       { body: this.buffer },
     );
+
+    this._file = r;
   }
 
   private async uploadAudioAndPersitFile() {
     this.generateKeyPath();
     await this.saveAudioFile();
+  }
+
+  private async saveFileIdToPoem() {
+    await this.poemRepository.persist({
+      entity: {
+        id: this.poem.id,
+        fileId: this.file.id,
+      },
+      manager: this._context.entityManager,
+    });
   }
 }

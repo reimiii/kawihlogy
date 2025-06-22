@@ -55,6 +55,8 @@ export class StorageService {
         Key: opts.key,
       },
     );
+
+    this.logger.log(`success delete object with key: ${opts.key}`);
   }
 
   async findOne(opts: Pick<S3OperationParams, 'key'>): Promise<string> {
@@ -63,12 +65,10 @@ export class StorageService {
       Key: opts.key,
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
     const url = await getSignedUrl(this.client, command, {
       expiresIn: 3600,
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return url;
   }
 }

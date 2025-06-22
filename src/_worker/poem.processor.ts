@@ -12,7 +12,7 @@ import { HandleGeneratePoemAudioCommand } from './commands/handle-generate-poem-
 import { HandleGeneratePoemCommand } from './commands/handle-generate-poem.command';
 
 @Processor(PoemStrings.POEM_QUEUE, {
-  concurrency: 5,
+  concurrency: 1,
   lockDuration: 5 * 60 * 1000,
 })
 export class PoemProcessor extends WorkerHost {

@@ -19,10 +19,13 @@ import { PoemJobName, PoemStrings } from './constants/poem-strings.constant';
 import { Poem } from './entities/poem.entity';
 import { PoemRepository } from './repositories/poem.repository';
 import {
+  DeletePoemOpts,
   PoemJobData,
   QueuePoemAudioTriggerOpts,
   QueuePoemTriggerOpts,
 } from './types/poem.type';
+import { FileService } from 'src/_infrastructure/file/file.service';
+import { DataSource } from 'typeorm';
 
 @Injectable()
 export class PoemService {
@@ -34,6 +37,8 @@ export class PoemService {
     private readonly journalService: JournalService,
     private readonly geminiService: GeminiService,
     private readonly repo: PoemRepository,
+    private readonly fileService: FileService,
+    private readonly ds: DataSource,
   ) {}
 
   /**
@@ -219,8 +224,72 @@ export class PoemService {
     return await this.repo.findOneUnique(params);
   }
 
-  async remove(params: DeletionOptions<Poem, 'id'>) {
-    return await this.repo.erase(params);
+  async remove(params: DeletePoemOpts) {
+    await this.ds.transaction(async (tx) => {
+      const curr = await this.findOne({
+        by: { key: 'id', value: params.identifier.id },
+        relations: { journal: true },
+        manager: tx,
+      });
+
+      if (!curr) throw new NotFoundException(`Poem Not Found`);
+
+      if (params.by.id !== curr.journal.userId)
+        throw new ForbiddenException('Access Denied');
+
+      await this.repo.erase({
+        entity: {
+          id: params.identifier.id,
+        },
+        manager: tx,
+      });
+
+      if (!curr.fileId) {
+        this.logger.log(`file id not found skip deleting file`);
+        return;
+      }
+
+      await this.fileService
+        .delete({
+          entity: {
+            id: curr.fileId,
+          },
+          manager: tx,
+        })
+        .catch((err) => {
+          this.logger.error(err);
+          throw err;
+        });
+    });
+  }
+
+  async deleteFileOnly(params: DeletePoemOpts) {
+    await this.ds.transaction(async (tx) => {
+      const curr = await this.findOne({
+        by: { key: 'id', value: params.identifier.id },
+        relations: { journal: true },
+        manager: tx,
+      });
+
+      if (!curr) throw new NotFoundException(`Poem Not Found`);
+
+      if (params.by.id !== curr.journal.userId)
+        throw new ForbiddenException('Access Denied');
+
+      if (!curr.fileId) throw new NotFoundException('File Not Found');
+
+      await this.fileService
+        .delete({
+          entity: {
+            id: curr.fileId,
+          },
+          manager: tx,
+        })
+        .catch((err) => {
+          this.logger.error(err);
+          throw err;
+        });
+    });
   }
 
   async archive(params: DeletionOptions<Poem, 'id'>) {

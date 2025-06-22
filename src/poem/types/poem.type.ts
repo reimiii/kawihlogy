@@ -1,5 +1,5 @@
 import { UserClaims } from 'src/auth/types/jwt-payload.type';
-import { ActionOpts } from 'src/core/types/option.types';
+import { ActionOpts, DeleteOpts } from 'src/core/types/option.types';
 import { EntityManager } from 'typeorm';
 import { z } from 'zod/v4';
 import { CreatePoemDto } from '../dto/create-poem.dto';
@@ -25,6 +25,7 @@ export type PoemContentPayload = z.infer<typeof PoemContentPayloadSchema>;
 
 export type QueuePoemTriggerOpts = ActionOpts<CreatePoemDto>;
 export type QueuePoemAudioTriggerOpts = ActionOpts<PoemIdDto>;
+export type DeletePoemOpts = DeleteOpts<PoemIdDto>;
 
 export type PoemState =
   | {
