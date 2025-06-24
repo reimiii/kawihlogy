@@ -33,13 +33,14 @@ import {
   UpdateJournalSchema,
 } from './dto/update-journal.dto';
 import { JournalService } from './journal.service';
+import { OptionalIdentity } from 'src/core/decorators/optional-identity.decorator';
+import { IsPublic } from 'src/core/decorators/is-public.decorator';
 
 /**
  * Controller responsible for handling HTTP requests related to journal operations
  * @class JournalController
  */
 @UseInterceptors(ClassSerializerInterceptor)
-@UseGuards(JwtAuthGuard)
 @Controller('journal')
 export class JournalController {
   private readonly logger = new Logger(JournalController.name);
@@ -52,6 +53,7 @@ export class JournalController {
    * @param {UserClaims} createdBy - The user creating the journal
    * @returns {Promise<void>} - Returns nothing on success
    */
+  @UseGuards(JwtAuthGuard)
   @Post()
   async create(
     @Body(new ZodValidationPipe(CreateJournalSchema))
@@ -73,14 +75,17 @@ export class JournalController {
    * @param {JournalPaginationQueryDto} query - The pagination query parameters
    * @returns {Promise<JournalPaginateListResponse>} - Returns paginated list of journals
    */
+  @UseGuards(JwtAuthGuard)
+  @IsPublic()
   @Get()
   async findAll(
     @Query(new ZodValidationPipe(JournalPaginationQuerySchema))
     query: JournalPaginationQueryDto,
+    @OptionalIdentity() accessBy: UserClaims | undefined,
   ): Promise<JournalPaginateListResponse> {
     this.logger.log('Starting get all journals');
 
-    const res = await this.journalService.paginatePublic(query);
+    const res = await this.journalService.paginatePublic(query, accessBy);
 
     this.logger.log('Finished get all journals');
     return new JournalPaginateListResponse(res);
@@ -92,6 +97,7 @@ export class JournalController {
    * @param {UserClaims} accessBy - The user accessing the journal
    * @returns {Promise<JournalResponseDto>} - Returns the requested journal entry
    */
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
   async findOne(
     @Param(new ZodValidationPipe(JournalIdSchema)) params: JournalIdDto,
@@ -115,6 +121,7 @@ export class JournalController {
    * @param {UserClaims} createdBy - The user updating the journal
    * @returns {Promise<void>} - Returns nothing on success
    */
+  @UseGuards(JwtAuthGuard)
   @HttpCode(204)
   @Patch(':id')
   async update(
@@ -140,6 +147,7 @@ export class JournalController {
    * @param {UserClaims} deletedBy - The user deleting the journal
    * @returns {Promise<void>} - Returns nothing on success
    */
+  @UseGuards(JwtAuthGuard)
   @HttpCode(204)
   @Delete(':id')
   async remove(

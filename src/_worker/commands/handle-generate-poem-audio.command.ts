@@ -156,7 +156,6 @@ export class HandleGeneratePoemAudioCommand {
   }
 
   private generateKeyPath() {
-    console.log(this.mimeType);
     const ext = mime.getExtension(this.mimeType);
 
     if (!ext) throw new Error('Mime Is Undefine');

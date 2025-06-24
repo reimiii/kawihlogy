@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
 import { FindOneOptionsBy } from 'src/core/repositories/utils/find-one.util';
-import { DataSource } from 'typeorm';
+import { DataSource, In } from 'typeorm';
 import { CreateJournalCommand } from './commands/create-journal.command';
 import { DeleteJournalCommand } from './commands/delete-journal.command';
 import { UpdateJournalCommand } from './commands/update-journal.command';
@@ -20,6 +20,7 @@ import {
   UpdateJournalOptions,
 } from './types/journal.type';
 import { FileService } from 'src/_infrastructure/file/file.service';
+import { UserClaims } from 'src/auth/types/jwt-payload.type';
 
 @Injectable()
 export class JournalService {
@@ -65,8 +66,18 @@ export class JournalService {
    * @param params.userId - Optional user ID to filter journals by
    * @returns Paginated list of journal entries with user information
    */
-  async paginatePublic(params: JournalPaginationQueryDto) {
+  async paginatePublic(
+    params: JournalPaginationQueryDto,
+    accessBy: UserClaims | undefined,
+  ) {
     this.logger.log('start: paginate journals');
+
+    const isOwner = params.userId && accessBy?.id === params.userId;
+
+    if (params.userId && !isOwner) {
+      throw new ForbiddenException('Access Denied');
+    }
+
     const res = await this.repo.paginate({
       page: params.page,
       size: params.size,
@@ -75,6 +86,7 @@ export class JournalService {
       },
       where: {
         ...(params.userId && { userId: params.userId }),
+        isPrivate: isOwner ? In([true, false]) : false,
       },
       order: {
         date: 'desc',
