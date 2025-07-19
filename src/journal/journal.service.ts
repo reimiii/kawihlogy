@@ -74,10 +74,6 @@ export class JournalService {
 
     const isOwner = params.userId && accessBy?.id === params.userId;
 
-    if (params.userId && !isOwner) {
-      throw new ForbiddenException('Access Denied');
-    }
-
     const res = await this.repo.paginate({
       page: params.page,
       size: params.size,
@@ -130,7 +126,7 @@ export class JournalService {
     if (res.isPrivate && res.userId !== params.accessBy.id)
       throw new ForbiddenException('Access Denied');
 
-    if (res.poem.file) {
+    if (res.poem && res.poem.file) {
       const r = await this.fileService.findKeyUrl(res.poem.file.key);
       res.poem.file.url = r;
     }

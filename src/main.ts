@@ -11,10 +11,14 @@ async function bootstrap() {
     logger: ['error', 'warn', 'log', 'debug', 'verbose', 'fatal'],
   });
 
-  app.getHttpAdapter().getInstance().disable('x-powered-by');
-
   const config = app.get(EnvService);
   const port = config.get('PORT');
+
+  app.getHttpAdapter().getInstance().disable('x-powered-by');
+
+  app.enableCors({
+    origin: config.get('CORS_ORIGIN'),
+  });
 
   dayjs.extend(isSameOrBefore);
   dayjs.extend(customParseFormat);

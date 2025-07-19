@@ -13,10 +13,6 @@ import { JoinRoomPoemDto } from './dto/join-room-poem.dto';
 
 @WebSocketGateway({
   namespace: 'poem',
-  cors: {
-    origin: '*',
-    credentials: true,
-  },
   transports: ['websocket'],
 })
 export class PoemGateway {

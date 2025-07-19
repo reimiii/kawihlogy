@@ -12,6 +12,12 @@ export class JournalResponseDto {
   title: string;
 
   @Expose()
+  emotions: string[];
+
+  @Expose()
+  topics: string[];
+
+  @Expose()
   content: string;
 
   @Expose()

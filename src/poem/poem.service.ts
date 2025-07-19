@@ -130,7 +130,7 @@ export class PoemService {
     const jobNew = await this.poemQueue.add(
       PoemStrings.JOBS.TEXT,
       { identifier: journal.id, requestedBy: options.by },
-      { jobId: identifier, removeOnComplete: 60 * 60, removeOnFail: 5 * 60 }, // 1 hour on complete, 5 minutes on fail
+      { jobId: identifier, removeOnComplete: true, removeOnFail: true }, // 1 hour on complete, 5 minutes on fail
     );
 
     this.logger.log(

@@ -8,11 +8,11 @@ import { PickExcept } from 'src/core/types/option.types';
 
 @Exclude()
 export class JournalPaginateListResponse
-  implements PaginateResult<PickExcept<JournalResponseDto, 'poem'>>
+  implements PaginateResult<PickExcept<JournalResponseDto, 'poem' | 'emotions'>>
 {
   @Expose()
   @Type(() => JournalResponseDto)
-  items: PickExcept<JournalResponseDto, 'poem'>[];
+  items: PickExcept<JournalResponseDto, 'poem' | 'emotions'>[];
 
   @Expose()
   meta: PaginateMeta;
