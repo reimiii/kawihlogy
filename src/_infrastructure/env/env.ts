@@ -1,5 +1,5 @@
-import { z } from 'zod';
 import 'dotenv/config';
+import { z } from 'zod';
 
 export const envSchema = z.object({
   SERVICE_NAME: z
@@ -75,6 +75,8 @@ export const envSchema = z.object({
   REDIS_PORT: z.coerce
     .number()
     .int({ message: 'REDIS_PORT must be an integer' }),
+
+  REDIS_PASSWORD: z.string().optional(),
 
   GEMINI_API_KEY: z
     .string()

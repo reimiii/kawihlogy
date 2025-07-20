@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # This script is used to manage database migrations using TypeORM.
 # It provides commands to generate, create, run, and revert migrations.
@@ -18,28 +18,28 @@ if [ -z "$CMD" ]; then
   exit 1
 fi
 
-if [ "$CMD" == "generate" ] && [ -z "$NAME" ]; then
+if [ "$CMD" = "generate" ] && [ -z "$NAME" ]; then
   echo "Error: Name is required for the generate command"
   exit 1
 fi
 
-if [ "$CMD" == "create" ] && [ -z "$NAME" ]; then
+if [ "$CMD" = "create" ] && [ -z "$NAME" ]; then
   echo "Error: Name is required for the create command"
   exit 1
 fi
 
-case $CMD in
+case "$CMD" in
   generate)
-    pnpm run typeorm migration:generate -d $DATA_SOURCE $PATH_TO_MIGRATIONS/$NAME
+    pnpm run typeorm migration:generate -d "$DATA_SOURCE" "$PATH_TO_MIGRATIONS/$NAME"
     ;;
   create)
-    pnpm run typeorm migration:create $PATH_TO_MIGRATIONS/$NAME
+    pnpm run typeorm migration:create "$PATH_TO_MIGRATIONS/$NAME"
     ;;
   run)
-    pnpm run typeorm migration:run -d $DATA_SOURCE
+    pnpm run typeorm migration:run -d "$DATA_SOURCE"
     ;;
   revert)
-    pnpm run typeorm migration:revert -d $DATA_SOURCE
+    pnpm run typeorm migration:revert -d "$DATA_SOURCE"
     ;;
   *)
     echo "Unknown command: $CMD"
