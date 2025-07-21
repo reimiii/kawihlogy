@@ -1,0 +1,30 @@
+name: Deployment Build and Publish image to Docker Hub
+
+on:
+  push:
+    branches: ['master']
+    paths:
+      - 'Dockerfile'
+  workflow_dispatch:
+
+env:
+  USERNAME: reimii
+  IMG_REPO: kawihlogy
+  IMG_TAG: latest
+
+permissions:
+  contents: read
+
+jobs:
+  publish_images:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+      - name: build image
+        run: |
+          docker build . -t $USERNAME/$IMG_REPO:$IMG_TAG
+      - name: push image to docker hub
+        run: |
+          docker login -u $USERNAME -p ${{ secrets.DOCKER_HUB_TOKEN }}
+          docker push $USERNAME/$IMG_REPO:$IMG_TAG
